@@ -36,3 +36,29 @@ export type OverviewResult = {
   cards: { label: string; value: number }[]
   modules: { name: string; created: number; pending: number; abnormal: number }[]
 }
+
+// 裂缝观测中断补录：缺口时段里的一天，只可能是「还没补」或「已放弃（可重试）」。
+export type BackfillSlot = {
+  date: string
+  state: '待补录' | '已放弃'
+  reason: string
+}
+
+// 从待补录重新进入时拿到的补录边界：只含缺口时段，不含已落定的日期。
+export type BackfillPlan = {
+  pointId: number
+  pointCode: string
+  hazardCode: string
+  crackCode: string
+  gapStart: string
+  gapEnd: string
+  slots: BackfillSlot[]
+}
+
+// 历史观测按空态 / 正常 / 异常值 / 缺失记录分开呈现。
+export type ObservationHistory = {
+  total: number
+  normal: EntryRow[]
+  abnormal: EntryRow[]
+  missing: EntryRow[]
+}

@@ -64,8 +64,15 @@ npm run build
 ## 约定
 
 - 每个模块的页面在 `frontend/src/views/<模块>/index.vue`，页面只负责渲染，读写统一走
-  `frontend/src/api/local-service.ts`。
+  `frontend/src/api/` 下的服务层。
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
-- 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
+- 状态流转只允许在服务层里改，页面组件不做业务判断。
+- 裂缝监测的观测中断补录在 `frontend/src/api/crack-backfill.ts`：测点「标记中断」进入
+  「待补录」后，从测点状态、历史观测、巡查排查待办三条路径都能定位；补录只覆盖缺口时段，
+  空白不能当正常值，放弃必须填失败原因；缺口全部落定后测点自动恢复「正常」并在巡查排查
+  生成一条复查事项（按补录批次去重，重复提交只保留一次，失败不留半条补录状态）。
+  速率口径：同一日期人工补录覆盖自动采集记录；变化速率只由带日期的有效观测（正常值与
+  异常值）重算，缺失记录不参与；初始宽度没有观测日期、不参与速率推算，旧记录缺初始宽度
+  按「未测」兼容。
 - 想回到初始数据：清掉浏览器里 `geohazard-monitor-prevention:entries` 这一项，或调用 `resetModule(模块)`。

@@ -48,6 +48,15 @@ export function saveRows(key: string, rows: EntryRow[]): void {
   }
 }
 
+// 一次落库多个集合：先写 localStorage 成功再更新缓存，任何一步失败都不会留下半条状态。
+export function saveModules(entries: Record<string, EntryRow[]>): void {
+  const next = { ...allRows(), ...entries }
+  if (typeof window !== 'undefined' && window.localStorage) {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  }
+  cache = next
+}
+
 export function resetRows(key: string): EntryRow[] {
   const rows = clone(SEED_ROWS[key] ?? [])
   saveRows(key, rows)
