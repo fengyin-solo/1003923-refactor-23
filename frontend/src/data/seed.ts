@@ -1,7 +1,9 @@
+import { buildCrackSeedRows } from './crack-seed'
 import type { EntryRow } from './types'
 
 // 示例数据：首次打开时播种，之后浏览器里的改动优先，重置才会回到这份。
-export const SEED_ROWS: Record<string, EntryRow[]> = {
+// 裂缝测点使用带观测序列的领域种子（见 crack-seed.ts），其余模块使用通用模板。
+const RAW_SEED_ROWS: Record<string, EntryRow[]> = {
   "hazard": [
     {
       "id": 1,
@@ -795,3 +797,5 @@ export const SEED_ROWS: Record<string, EntryRow[]> = {
     }
   ],
 }
+
+export const SEED_ROWS: Record<string, EntryRow[]> = buildCrackSeedRows(RAW_SEED_ROWS)

@@ -5,7 +5,8 @@ export type EntryRow = {
   status: string
   pending: boolean
   abnormal: boolean
-  [field: string]: string | number | boolean
+  // 历史数据迁移会出现空字段（如旧裂缝测点缺初始宽度），统一按 null 表达「未测」，不能当成 0。
+  [field: string]: string | number | boolean | null
 }
 
 export type ModuleMeta = {

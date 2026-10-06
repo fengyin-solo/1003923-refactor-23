@@ -18,6 +18,10 @@
       </article>
     </div>
 
+    <div v-if="reviewCount" class="review-banner">
+      有 {{ reviewCount }} 条裂缝补录完成后的现场复查事项待处理，请在现场复核后再确认处置。
+    </div>
+
     <p class="status-legend">
       <span v-for="item in statusSummary" :key="item.status" class="legend-item">
         {{ item.status }}：{{ item.count }}
@@ -42,8 +46,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows" :key="String(row.id)">
-          <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+        <tr v-for="row in rows" :key="String(row.id)" :class="{ 'row-review': row['任务类型'] === '补录复查' }">
+          <td v-for="column in columns" :key="column">
+            <template v-if="column === '巡查状态'">
+              <span :class="['review-flag', { 'is-review': row['任务类型'] === '补录复查' }]">
+                {{ row[column] ?? '—' }}
+              </span>
+            </template>
+            <template v-else>{{ row[column] ?? '—' }}</template>
+          </td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -84,14 +95,30 @@ import type { EntryRow } from '@/data/types'
 const meta = moduleMeta('patrol')
 const columns = ["巡查编号", "隐患点编号", "巡查日期", "巡查人员", "巡查范围", "发现异常", "处置措施", "巡查状态"]
 const actions = ["完成巡查", "报告异常", "确认处置"]
-const statuses = ["待巡查", "已巡查", "发现异常", "已处置"]
-const stats = [{"label": "本月巡查次数", "value": 0}, {"label": "发现异常数", "value": 0}, {"label": "待处置数", "value": 0}]
+const statuses = ["待巡查", "已巡查", "待复查", "发现异常", "已处置"]
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
 const errorMessage = ref('')
 const filters = ref<Record<string, string>>({})
 const filterFields = columns.slice(0, 3)
+const stats = computed(() => [
+  {
+    label: "本月巡查次数",
+    value: rows.value.length,
+  },
+  {
+    label: "发现异常数",
+    value: rows.value.filter((row) => String(row.status) === "发现异常").length,
+  },
+  {
+    label: "补录待复查",
+    value: reviewCount.value,
+  },
+])
+const reviewCount = computed(() =>
+  rows.value.filter((row) => String(row['任务类型']) === '补录复查' && String(row.status) !== '已处置').length,
+)
 const statusSummary = computed(() =>
   statuses.map((status: string) => ({
     status,
@@ -135,3 +162,25 @@ function reload() {
 
 onMounted(reload)
 </script>
+
+<style scoped>
+.review-banner {
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.row-review {
+  background: #fffbeb;
+}
+.review-flag.is-review {
+  background: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+}
+</style>
